@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#terminates infinite loop
+pid=$(pgrep -f '4-to_infinity_and_beyond')
+kill "$pid"
