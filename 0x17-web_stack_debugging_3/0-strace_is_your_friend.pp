@@ -1,28 +1,12 @@
-# fixes bad 'phpp' to 'php' in the wordpress file 'wp-settings.php' on apache
-# fix 500 error
-package { 'apache2':
-  ensure => installed,
-}
+# Fix WordPress PHP file extension typo causing Apache 500 error
 
-package { 'libapache2-mod-php':
-  ensure => installed,
-}
-
-file { '/var/www/html/':
-  ensure  => directory,
-  owner   => 'www-data',
-  group   => 'www-data',
-  recurse => true,
-}
-
-exec { 'enable-mod-rewrite':
-  command => '/usr/sbin/a2enmod rewrite',
-  unless  => '/bin/grep -q "rewrite.load" /etc/apache2/mods-enabled/',
-  notify  => Service['apache2'],
+exec { 'fix-wordpress':
+  command => 'sed -i s/phpp/php/g /var/www/html/wp-settings.php',
+  path    => '/usr/local/bin:/usr/bin:/bin',
+  onlyif  => 'grep -q "phpp" /var/www/html/wp-settings.php',
 }
 
 service { 'apache2':
   ensure  => running,
-  enable  => true,
-  require => [Package['apache2'], Exec['enable-mod-rewrite']],
+  require => Exec['fix-wordpress'],
 }
